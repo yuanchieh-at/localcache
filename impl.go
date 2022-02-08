@@ -16,7 +16,7 @@ type cache struct {
 	m sync.Mutex
 }
 
-func New() *cache {
+func New() Cache {
 	c := &cache{
 		store: map[string]value{},
 	}
