@@ -5,10 +5,13 @@ import (
 	"time"
 )
 
+const (
+	ttl = 30 * time.Second
+	checkInterval = 1 * time.Second
+)
+
 var (
 	timeNow = time.Now
-	ttl = 30 * time.Minute
-	checkInterval = 1 * time.Second
 )
 
 type cache struct {
