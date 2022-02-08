@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ttl = 30 * time.Minute
+	ttl = 30 * time.Second
 	checkInterval = 1 * time.Second
 )
 
