@@ -14,11 +14,13 @@ var (
 type cache struct {
 	store map[string]value
 	m sync.Mutex
+	stop chan bool
 }
 
 func New() *cache {
 	c := &cache{
 		store: map[string]value{},
+		stop: make(chan bool),
 	}
 	go c.deleteExpiredKey()
 
@@ -55,6 +57,10 @@ func (c *cache) Set(k string, v interface{}) error {
 	return nil
 }
 
+func (c *cache) Stop() {
+	c.stop <- true
+}
+
 func (c *cache) delete(key string) error {
 	c.m.Lock()
 	defer c.m.Unlock()
@@ -62,16 +68,21 @@ func (c *cache) delete(key string) error {
 	return nil
 }
 
-// check and delete expired key every seconds
-// could be optimized by using priority queue and sleep to nearest expiredAt to avoid unnecessary checking
 func (c *cache) deleteExpiredKey() {
-	for k,v := range c.store {
-		if !v.isExpired() {
-			continue
+	for {
+		select {
+			case <- c.stop:
+				return
+		default:
+			for k, v := range c.store {
+				if !v.isExpired() {
+					continue
+				}
+				_ = c.delete(k)
+			}
+			time.Sleep(checkInterval)
 		}
-		_ = c.delete(k)
 	}
-	time.Sleep(checkInterval)
 }
 
 type value struct {
